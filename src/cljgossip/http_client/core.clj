@@ -4,3 +4,7 @@
 
 (defn connect [uri]
   (ws/connect uri))
+
+(defn post
+  "Post a message to the socket asynchronously."
+  [session message])
