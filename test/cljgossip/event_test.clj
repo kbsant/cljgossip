@@ -8,7 +8,7 @@
           handlers {:cljgossip/on-tell-receive on-tell-receive}
           tell-event {"event" "tells/receive" "payload" {}}]
       (is (= "received"
-             (dispatch handlers tell-event))))))
+             (dispatch handlers {} tell-event))))))
 
 (deftest optional-ref-test
   (testing "Sign in takes an optional ref."

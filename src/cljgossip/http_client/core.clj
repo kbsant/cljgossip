@@ -12,8 +12,8 @@
 
 (defn post-as-json
   "Post a message to the socket asynchronously."
-  [socket message]
-  (ws/send-msg (json/write-str message)))
+  [client message]
+  (ws/send-msg client (json/write-str message)))
 
 (defn handlers
   "Map handler to websocket implementation, converting messages to edn"

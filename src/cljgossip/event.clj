@@ -120,10 +120,10 @@
    ;; Receive the status of a game.
    "games/status" :cljgossip/on-game-status})
 
-(defn dispatch [handlers ev]
+(defn dispatch [handlers ws-client ev]
   (let [handler-fn (->> (get ev "event")
                         (get event-map)
                         (get handlers))]
     (when handler-fn
-      (handler-fn ev))))
+      (handler-fn ws-client ev))))
 
