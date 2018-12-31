@@ -1,3 +1,4 @@
+;; Unaffilated, unofficial implementation of the gossip protocol: gossip.haus/docs
 (ns cljgossip.event
   (:require
    [clojure.string :as string]))
@@ -91,68 +92,38 @@
               "message" message-text}})
 
 (def event-map
-  {"authenticate" :on-authenticate-status
-   "heartbeat" :on-heartbeat
-   "restart" :on-restart
-   "channels/subscribe" :on-channels-subscribe-status
-   "channels/unsubscribe" :on-channels-unsubscribe-status
-   "players/sign-in" :on-players-sign-in
-   "players/sign-out" :on-players-sign-out
-   "players/status" :on-players-status
-   "tells/send" :on-tell-status
-   "tells/receive" :on-tell-receive
-   "games/connect" :on-game-connected
-   "games/disconnect" :on-game-disconnected
-   "games/status" :on-game-status})
+  {"authenticate" :cljgossip/on-authenticate-status
+   "heartbeat" :cljgossip/on-heartbeat
+   ;; No need to do anything special at the network level for a restart.
+   ;; Just notify play1ers that the gossip server is restarting. #botmessage
+   "restart" :cljgossip/on-restart
+   ;; Receive an ack/nack after subsribing
+   "channels/subscribe" :cljgossip/on-channels-subscribe-status
+   ;; Receive an ack/nack after unsubscribing
+   "channels/unsubscribe" :cljgossip/on-channels-unsubscribe-status
+   ;; Receive notification a player has signed in.
+   ;; Useful for creating a menu of tell recipients.
+   "players/sign-in" :cljgossip/on-players-sign-in
+   ;; Receive notication a player has signed out.
+   ;; Useful for creating a menu of tell recipients.
+   "players/sign-out" :cljgossip/on-players-sign-out
+   ;; Receive status of connected players. Might want to filter by ref.
+   "players/status" :cljgossip/on-players-status
+   ;; Receive an ack whether a tell has been sent or not.
+   "tells/send" :cljgossip/on-tell-status
+   ;; Receive a tell
+   "tells/receive" :cljgossip/on-tell-receive
+   ;; Receive notifcation that a game has connected
+   "games/connect" :cljgossip/on-game-connected
+   ;; Receive notification that a game has disconnected
+   "games/disconnect" :cljgossip/on-game-disconnected
+   ;; Receive the status of a game.
+   "games/status" :cljgossip/on-game-status})
 
-(defn dispatch-event [handlers ev]
-  (let [event-type (get event-map (get ev "event"))
-        handler-fn (get handlers event-type)]
+(defn dispatch [handlers ev]
+  (let [handler-fn (->> (get ev "event")
+                        (get event-map)
+                        (get handlers))]
     (when handler-fn
       (handler-fn ev))))
-
-(defmulti dispatch (fn [ev]) (get ev  "event"))
-
-(defmethod dispatch :default [ev])
-
-(defmethod dispatch "authenticate" [ev]
-  )
-
-(defmethod dispatch "heartbeat" [ev])
-
-;; No need to do anything special at the network level for a restart.
-;; Just notify play1ers that the gossip server is restarting. #botmessage
-(defmethod dispatch "restart" [ev])
-
-;; Receive an ack/nack after subsribing
-(defmethod dispatch "channels/subscribe" [ev])
-
-;; Receive an ack/nack after unsubscribing
-(defmethod dispatch "channels/unsubscribe" [ev])
-
-;; Receive notification a player has signed in.
-;; Useful for creating a menu of tell recipients.
-(defmethod dispatch "players/sign-in" [ev])
-
-;; Receive notication a player has signed out.
-;; Useful for creating a menu of tell recipients.
-(defmethod dispatch "players/sign-out" [ev])
-
-;; Receive status of connected players.
-(defmethod dispatch "players/status" [ev])
-
-;; Receive an ack whether a tell has been sent or not.
-(defmethod dispatch "tells/send" [ev])
-
-;; Receive a tell
-(defmethod dispatch "tells/receive" [ev])
-
-;; Receive notifcation that a game has connected
-(defmethod dispatch "games/connect" [ev])
-
-;; Receive notification that a game has disconnected
-(defmethod dispatch "games/disconnect" [ev])
-
-;; Receive the status of a game.
-(defmethod dispatch "games/status" [ev])
 
