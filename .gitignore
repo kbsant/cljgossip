@@ -13,3 +13,4 @@ pom.xml.asc
 .nrepl-port
 .cpcache/
 setenv.sh
+devenv.edn
