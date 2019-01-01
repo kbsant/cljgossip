@@ -33,7 +33,7 @@
     gossip-client-id
     gossip-client-hash)))
 
-(defn wrap
+(defn wrap-as-ws
   "Wrap gossip handlers as socket handlers"
   [conn on-connect-promise gossip-handlers]
   (client/handlers

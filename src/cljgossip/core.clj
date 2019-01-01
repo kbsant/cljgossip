@@ -11,11 +11,11 @@
    (connect
     gossip-uri gossip-client-agent gossip-client-id gossip-client-hash gossip-handlers))
   ([gossip-uri gossip-client-agent gossip-client-id gossip-client-hash gossip-handlers]
-   (let [conn (atom {}) ; need an ugly placeholder for the connection returned by the lib
+   (let [conn (promise) ; need an ugly placeholder for the connection returned by the lib
          on-connect-promise (promise)
-         ws-handlers (handlers/wrap conn on-connect-promise gossip-handlers)
+         ws-handlers (handlers/wrap-as-ws conn on-connect-promise gossip-handlers)
          client (client/connect gossip-uri ws-handlers)]
-     (swap! conn assoc :cljgossip/ws-client client)
+     (deliver conn {:cljgossip/ws-client client})
      (when (deref on-connect-promise 1000 nil)
        (handlers/authenticate-on-connect
         client gossip-client-agent gossip-client-id gossip-client-hash)
