@@ -21,7 +21,13 @@
         client gossip-client-agent gossip-client-id gossip-client-hash)
        @conn))))
 
-(defn send-all [{:cljgossip/keys [ws-client]} source msg])
+(defn send-all [{:cljgossip/keys [ws-client]} source msg]
+  (client/post-as-json
+   ws-client
+   (event/send-all
+    "gossip"
+    source
+    msg)))
 
 (defn send-to [{:cljgossip/keys [ws-client]} source target msg])
 
