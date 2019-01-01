@@ -10,8 +10,9 @@
 (defn close [client]
   (ws/close client))
 
-(defn post-as-json
-  "Post a message to the socket asynchronously."
+;; TODO write an async version
+(defn send
+  "Send a message to the socket synchronously. The message will be converted to json."
   [client message]
   (ws/send-msg client (json/write-str message)))
 

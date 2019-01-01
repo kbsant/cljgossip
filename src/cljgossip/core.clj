@@ -2,7 +2,10 @@
   (:require
    [cljgossip.http-client.core :as client]
    [cljgossip.event :as event]
-   [cljgossip.handlers :as handlers]))
+   [cljgossip.handlers :as handlers]
+   [medley.core :as medley])
+  (:import
+   java.time.Instant))
 
 (defn connect
   "Connect and login to a gossip server."
@@ -21,15 +24,30 @@
         client gossip-client-agent gossip-client-id gossip-client-hash)
        @conn))))
 
-(defn send-all [{:cljgossip/keys [ws-client]} source msg]
-  (client/post-as-json
+(defn send-all
+  "Send a message to all subscribers."
+  [{:cljgossip/keys [ws-client]} source msg]
+  (client/send
    ws-client
    (event/send-all
     "gossip"
     source
     msg)))
 
-(defn send-to [{:cljgossip/keys [ws-client]} source target msg])
+(defn send-to
+  "Send a tell to a specific target. Returns ref uuid of the sent message."
+  [{:cljgossip/keys [ws-client]} source target msg]
+  (let [ref (medley/random-uuid)
+        tstamp (.toString (Instant/now))]
+    (client/send
+     ws-client
+     (event/tell-send
+      "gossip"
+      source
+      target
+      msg
+      tstamp))
+    ref))
 
 (defn close [{:cljgossip/keys [ws-client]}]
   (client/close ws-client))

@@ -17,7 +17,7 @@
 
 (defn default-heartbeat-handler [{:cljgossip/keys [ws-client]} ev]
   (log/info "reply to heartbeat: " ev)
-  (client/post-as-json
+  (client/send
    ws-client
    (event/heartbeat nil)))
 
@@ -26,7 +26,7 @@
 
 (defn authenticate-on-connect
   [ws-client gossip-client-agent gossip-client-id gossip-client-hash]
-  (client/post-as-json
+  (client/send
    ws-client
    (event/authenticate
     gossip-client-agent
