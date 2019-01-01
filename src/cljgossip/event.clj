@@ -15,7 +15,7 @@
   {"event" "authenticate"
    "payload" {"client_id" client-id
               "client_secret" client-secret
-              "supports" ["channels" "test"]
+              "supports" ["channels"]
               "channels" ["gossip" "test"]
               "user_agent" client-agent}})
 

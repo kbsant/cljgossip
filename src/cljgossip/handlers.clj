@@ -16,7 +16,7 @@
 ;;
 
 (defn default-heartbeat-handler [{:cljgossip/keys [ws-client]} ev]
-  (log/info "heartbeat: " ev)
+  (log/info "reply to heartbeat: " ev)
   (client/post-as-json
    ws-client
    (event/heartbeat nil)))
@@ -37,15 +37,15 @@
   "Wrap gossip handlers as socket handlers"
   [conn on-connect-promise gossip-handlers]
   (client/handlers
-   (merge default-gossip-handlers
-          {:cljgossip/ws-on-connect
-           (fn [session]
-             (deliver on-connect-promise session))
-           :cljgossip/ws-on-receive
-           (fn [message]
-             (event/dispatch gossip-handlers @conn message))
-           :cljgossip/ws-on-error
-           (fn [ex])
-           :cljgossip/ws-on-close
-           (fn [status-code reason])})))
+   {:cljgossip/ws-on-connect
+    (fn [session]
+      (deliver on-connect-promise session))
+    :cljgossip/ws-on-receive
+    (fn [message]
+      (log/info "ws on receive:" message)
+      (event/dispatch (merge default-gossip-handlers gossip-handlers) @conn message))
+    :cljgossip/ws-on-error
+    (fn [ex] (log/info "ws on error: " ex))
+    :cljgossip/ws-on-close
+    (fn [status-code reason] (log/info "status: " status-code "reason: " reason))}))
 
