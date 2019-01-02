@@ -31,7 +31,8 @@
    (event/authenticate
     gossip-client-agent
     gossip-client-id
-    gossip-client-hash)))
+    gossip-client-hash
+    nil)))
 
 (defn wrap-as-ws
   "Wrap gossip handlers as socket handlers"

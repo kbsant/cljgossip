@@ -11,12 +11,15 @@
 
 (defn authenticate
   "Data for an authentication request. Use when opening a websocket."
-  [client-agent client-id client-secret]
+  [client-agent client-id client-secret channel-list]
   {"event" "authenticate"
    "payload" {"client_id" client-id
               "client_secret" client-secret
-              "supports" ["channels"]
-              "channels" ["gossip" "test"]
+              "supports" ["channels" "players" "tells" "games"]
+              "channels" (if (seq channel-list)
+                           channel-list
+                           ["gossip" "announcements" "test"])
+              "version" "2.2.0"
               "user_agent" client-agent}})
 
 (defn heartbeat
