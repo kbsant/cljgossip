@@ -11,7 +11,7 @@
   (ws/close client))
 
 ;; TODO write an async version
-(defn send
+(defn send-as-json
   "Send a message to the socket synchronously. The message will be converted to json."
   [client message]
   (ws/send-msg client (json/write-str message)))

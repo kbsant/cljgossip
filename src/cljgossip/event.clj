@@ -26,7 +26,7 @@
   "Data for a heartbeat event."
   [players]
   (cond-> {"event" "heartbeat"}
-    (seq players) (assoc "payload" players)))
+    (seq players) (assoc-in ["payload" "players"] players)))
 
 (defn subscribe
   "Data to subscribe to channel. Use when responding to an authentication event."

@@ -78,8 +78,6 @@ To handle messages in an application, pass a map of callback functions when conn
     ;; specify it in the callback map
     (def app-conn (gossip/connect env {:cljgossip/on-tell-receive tell-cb}))
 
-See  `(vals cljgossip.events/event-map)` in `event.clj` for a list of callback keys. 
-
 ## Signing out
 
 Announce when a player signs out:
@@ -94,13 +92,16 @@ Gossip auto-disconnects after three heartbeats. To initiate the disconnection, u
      (gossip/close conn)
 
 
+See:
+* `cljgossip.handlers/default-on-heartbeat` for a sample handler
+* `test/cljgossip/core_test.clj` for a sample session implementing a heartbeat that sends the player list
+* `(vals cljgossip.events/event-map)` in `event.clj` for a list of callback keys. 
+
 # Roadmap
 
 Plans for this library:
 
-* Complete sample. Other functions can be handled (see `cljgossip.event` namespace), but a more complete sample is needed.
+* Separate websocket library. The http library (jetty-based) is currently included in the main package. It should be moved into an optional package instead. The dependencies should be passed as a parameter (easier interop with integrant), rather than using namespace override.
 
-* Separate websocket library. The http library (jetty-based) is currently included in the main package. It should be moved into an optional package instead.
-
-
+* Sample app. The code in `core_test.clj` should be in its own sample app project.
 

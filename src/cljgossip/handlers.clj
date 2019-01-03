@@ -7,26 +7,28 @@
 ;; Simplify state machine:
 ;; * allow
 ;;   ** active: login, send, send-all, list-game, list-all, player-list, close
-;;   ** reactive: receive-bcast, receive-tell, player-list, disconnected
-;;   ** implied: hbeat
+;;   ** reactive: hbeat, receive-bcast, receive-tell, player-list, disconnected
 ;; * details:
 ;;   ** login: composed of connect and auth.
 ;;      authenticate after connecting and receiving the socket client.
-;;   ** client doesn't need to know about heartbeats. mostly. maybe just a qos indicator.
+;;   ** gossip picks up the player list from the heartbeat message,
+;;      so the app need to provide a player list callback.
+;;      For richer functionality, e.g. qos indicator, handlers for on-heartbeat
+;;      and on-restart may be implemented.
 ;;
 
-(defn default-heartbeat-handler [{:cljgossip/keys [ws-client]} ev]
+(defn default-on-heartbeat [player-list-fn {:cljgossip/keys [ws-client]} ev]
   (log/info "reply to heartbeat: " ev)
-  (client/send
+  (client/send-as-json
    ws-client
-   (event/heartbeat nil)))
+   (event/heartbeat (player-list-fn))))
 
 (def default-gossip-handlers
-  {:cljgossip/on-heartbeat default-heartbeat-handler})
+  {:cljgossip/on-heartbeat (partial default-on-heartbeat (constantly nil))})
 
 (defn authenticate-on-connect
   [ws-client gossip-client-agent gossip-client-id gossip-client-hash]
-  (client/send
+  (client/send-as-json
    ws-client
    (event/authenticate
     gossip-client-agent
