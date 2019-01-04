@@ -22,14 +22,16 @@ Confirm that the account is working by loading the credentials in the repl, and 
 
     (require '[cljgossip.core :as gossip])
     
-    (def env {:gossip-uri "wss://gossip socket uri"
-              :gossip-client-id "id from config"
-              :gossip-client-hash "secret from config"
-              :gossip-client-agent "Name Of the Client Game"})
+    (def env {:cljgossip/ws-uri "wss://gossip socket uri"
+              :cljgossip/client-id "id from config"
+              :cljgossip/client-hash "secret from config"
+              :cljgossip/client-agent "Name Of the Client Game"})
 
-     ;; connect with the env and and empty handler map.
-     ;; the library will automatically merge in a default heartbeat handler
-     (def conn (gossip/connect env {}))
+     ;; login with the env, connection function and a handler map.
+     ;; the library will automatically merge in a default heartbeat handler.
+     ;; In this example, the handler map is empty. For a sample implementation,
+     ;; see core_test.clj.
+     (def conn (gossip/login env client/ws-connect {}))
      ;; => get authentication and heartbeat messages
 
 ## Signing in
@@ -101,7 +103,7 @@ See:
 
 Plans for this library:
 
-* Separate websocket library. The http library (jetty-based) is currently included in the main package. It should be moved into an optional package instead. The dependencies should be passed as a parameter (easier interop with integrant), rather than using namespace override.
+* Separate the websocket library. The websocket library (jetty-based) is currently included in the main artifact. It should be moved into an optional artifact instead.
 
 * Sample app. The code in `core_test.clj` should be in its own sample app project.
 

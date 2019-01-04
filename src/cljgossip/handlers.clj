@@ -1,6 +1,5 @@
 (ns cljgossip.handlers
   (:require
-   [cljgossip.http-client.core :as client]
    [cljgossip.event :as event]
    [clojure.tools.logging :as log]))
 
@@ -17,19 +16,16 @@
 ;;      and on-restart may be implemented.
 ;;
 
-(defn default-on-heartbeat [player-list-fn {:cljgossip/keys [ws-client]} ev]
+(defn default-on-heartbeat [player-list-fn {:cljgossip/keys [ws-send]} ev]
   (log/info "reply to heartbeat: " ev)
-  (client/send-as-json
-   ws-client
-   (event/heartbeat (player-list-fn))))
+  (ws-send (event/heartbeat (player-list-fn))))
 
 (def default-gossip-handlers
   {:cljgossip/on-heartbeat (partial default-on-heartbeat (constantly nil))})
 
-(defn authenticate-on-connect
-  [ws-client gossip-client-agent gossip-client-id gossip-client-hash]
-  (client/send-as-json
-   ws-client
+(defn authenticate
+  [{:cljgossip/keys [ws-send]} gossip-client-agent gossip-client-id gossip-client-hash]
+  (ws-send
    (event/authenticate
     gossip-client-agent
     gossip-client-id
@@ -39,16 +35,17 @@
 (defn wrap-as-ws
   "Wrap gossip handlers as socket handlers"
   [conn on-connect-promise gossip-handlers]
-  (client/handlers
-   {:cljgossip/ws-on-connect
-    (fn [session]
-      (deliver on-connect-promise session))
-    :cljgossip/ws-on-receive
-    (fn [message]
-      (log/info "ws on receive:" message)
-      (event/dispatch (merge default-gossip-handlers gossip-handlers) @conn message))
-    :cljgossip/ws-on-error
-    (fn [ex] (log/info "ws on error: " ex))
-    :cljgossip/ws-on-close
-    (fn [status-code reason] (log/info "status: " status-code "reason: " reason))}))
+  {:cljgossip/ws-on-connect
+   (fn [session]
+     ;; need to use a promise because some implementations don't provide
+     ;; the on-connect handler with a reference to the client
+     (deliver on-connect-promise session))
+   :cljgossip/ws-on-receive
+   (fn [message]
+     (log/info "ws on receive:" message)
+     (event/dispatch (merge default-gossip-handlers gossip-handlers) @conn message))
+   :cljgossip/ws-on-error
+   (fn [ex] (log/info "ws on error: " ex))
+   :cljgossip/ws-on-close
+   (fn [status-code reason] (log/info "status: " status-code "reason: " reason))})
 

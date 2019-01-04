@@ -1,6 +1,5 @@
 (ns cljgossip.core
   (:require
-   [cljgossip.http-client.core :as client]
    [cljgossip.event :as event]
    [cljgossip.handlers :as handlers]
    [medley.core :as medley])
@@ -10,47 +9,47 @@
 (defn str-uuid []
   (str (medley/random-uuid)))
 
-(defn connect
-  "Connect and login to a gossip server."
-  ([{:keys [gossip-uri gossip-client-agent gossip-client-id gossip-client-hash]}
-    gossip-handlers]
-   (connect
-    gossip-uri gossip-client-agent gossip-client-id gossip-client-hash gossip-handlers))
-  ([gossip-uri gossip-client-agent gossip-client-id gossip-client-hash gossip-handlers]
-   (let [conn (promise) ; need an ugly placeholder for the connection returned by the lib
+(defn login
+  "Connect and login to a gossip server.
+  This requires 3 arguments:
+  * a configuration map - containing the uri, and authentication details,
+  * a connection function - for calling the websocket implementation,
+  * and a map of handlers - to process gossip events"
+  ([{:cljgossip/keys [ws-uri client-agent client-id client-hash]}
+    connect-fn
+    event-handlers]
+   (login
+    ws-uri connect-fn client-agent client-id client-hash event-handlers))
+  ([ws-uri connect-fn client-agent client-id client-hash event-handlers]
+   (let [client (promise) ; need an ugly placeholder for the connection returned by the lib
          on-connect-promise (promise)
-         ws-handlers (handlers/wrap-as-ws conn on-connect-promise gossip-handlers)
-         client (client/connect gossip-uri ws-handlers)]
-     (deliver conn {:cljgossip/ws-client client})
+         ws-handlers (handlers/wrap-as-ws client on-connect-promise event-handlers)
+         conn (connect-fn ws-uri ws-handlers)]
+     (when conn
+       (deliver client conn))
      (when (deref on-connect-promise 1000 nil)
-       (handlers/authenticate-on-connect
-        client gossip-client-agent gossip-client-id gossip-client-hash)
-       @conn))))
+       (handlers/authenticate conn client-agent client-id client-hash)
+       conn))))
 
 (defn sign-in
   "Announce that a player signed in."
-  [{:cljgossip/keys [ws-client]} player-name]
+  [{:cljgossip/keys [ws-send]} player-name]
   (let [ref (str-uuid)]
-    (client/send-as-json
-     ws-client
-     (event/sign-in ref player-name))
+    (ws-send (event/sign-in ref player-name))
     ref))
 
 (defn sign-out
   "Announce that a player signed out."
-  [{:cljgossip/keys [ws-client]} player-name]
+  [{:cljgossip/keys [ws-send]} player-name]
   (let [ref (str-uuid)]
-    (client/send-as-json
-     ws-client
-     (event/sign-out ref player-name))
+    (ws-send (event/sign-out ref player-name))
     ref))
 
 (defn status
   "Request the status of a game, or all subscribers."
-  [{:cljgossip/keys [ws-client]} game-name]
+  [{:cljgossip/keys [ws-send]} game-name]
   (let [ref (str-uuid)]
-    (client/send-as-json
-     ws-client
+    (ws-send
      (if game-name
        (event/status-game ref game-name)
        (event/status-all ref)))
@@ -58,10 +57,9 @@
 
 (defn send-all
   "Send a message to all subscribers of a channel."
-  [{:cljgossip/keys [ws-client]} channel-name source msg]
+  [{:cljgossip/keys [ws-send]} channel-name source msg]
   (let [ref (str-uuid)]
-    (client/send-as-json
-     ws-client
+    (ws-send
      (event/send-all
       ref
       (or channel-name "gossip")
@@ -70,20 +68,12 @@
 
 (defn send-to
   "Send a tell to a specific target. Returns ref uuid of the sent message."
-  [{:cljgossip/keys [ws-client]} source target-game target msg]
+  [{:cljgossip/keys [ws-send]} source target-game target msg]
   (let [ref (str-uuid)
         tstamp (.toString (Instant/now))]
-    (client/send-as-json
-     ws-client
-     (event/tell-send
-      ref
-      source
-      target-game
-      target
-      msg
-      tstamp))
+    (ws-send (event/tell-send ref source target-game target msg tstamp))
     ref))
 
-(defn close [{:cljgossip/keys [ws-client]}]
-  (client/close ws-client))
+(defn close [{:cljgossip/keys [ws-close]}]
+  (ws-close))
 

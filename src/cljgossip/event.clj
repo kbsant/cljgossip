@@ -77,11 +77,11 @@
    "ref" ref})
 
 (defn status-game
-  "Data to request status of players belonging to a game."
+  "Data to request status of a game."
   [ref game-name]
-  {"event" "games/status"
-   "ref" ref
-   "payload" {"game" game-name}})
+  (cond->  {"event" "games/status"
+            "ref" ref}
+    (not (string/blank? game-name)) (assoc-in ["payload" "game"] game-name)))
 
 (defn tell-send
   "Data to send a tell. A ref is returned and can be used to dispatch the sending status."

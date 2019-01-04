@@ -1,6 +1,7 @@
 (ns cljgossip.core-test
   (:require [clojure.test :refer :all]
             [cljgossip.core :refer :all]
+            [cljgossip.http-client.core :as client]
             [cljgossip.handlers :as handlers]))
 
 (comment
@@ -20,7 +21,7 @@
     {:cljgossip/on-heartbeat
      (partial handlers/default-on-heartbeat (list-players-fn app))})
 
-  (def conn (connect env (gossip-handlers app)))
+  (def conn (login env client/ws-connect (gossip-handlers app)))
 
   (sign-in conn "Frida")
 
@@ -39,4 +40,5 @@
   (status conn nil)
 
   (close conn)
+
  )
