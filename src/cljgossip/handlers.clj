@@ -1,3 +1,4 @@
+;; Default gossip handlers and helper functions
 (ns cljgossip.handlers
   (:require
    [cljgossip.event :as event]

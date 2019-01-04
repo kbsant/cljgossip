@@ -1,4 +1,4 @@
-;; Unaffilated, unofficial implementation of the gossip protocol: gossip.haus/docs
+;; Implementation of the gossip protocol data structures in EDN. See: gossip.haus/docs
 (ns cljgossip.event
   (:require
    [clojure.string :as string]))

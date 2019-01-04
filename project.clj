@@ -3,8 +3,6 @@
   :url "https://github.com/kbsant/cljgossip"
   :dependencies
   [[org.clojure/clojure "1.10.0"]
-   [org.clojure/data.json "0.2.6"]
    [org.clojure/tools.logging "0.4.1"]
-   [medley "1.0.0"]
-   [stylefruits/gniazdo "1.1.1"]]
+   [medley "1.0.0"]]
   :repl-options {:init-ns cljgossip.core})

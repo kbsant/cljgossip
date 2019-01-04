@@ -1,13 +1,9 @@
+;; Main library for the gossip client
 (ns cljgossip.core
   (:require
    [cljgossip.event :as event]
    [cljgossip.handlers :as handlers]
-   [medley.core :as medley])
-  (:import
-   java.time.Instant))
-
-(defn str-uuid []
-  (str (medley/random-uuid)))
+   [cljgossip.util :as util]))
 
 (defn login
   "Connect and login to a gossip server.
@@ -34,21 +30,21 @@
 (defn sign-in
   "Announce that a player signed in."
   [{:cljgossip/keys [ws-send]} player-name]
-  (let [ref (str-uuid)]
+  (let [ref (util/str-uuid)]
     (ws-send (event/sign-in ref player-name))
     ref))
 
 (defn sign-out
   "Announce that a player signed out."
   [{:cljgossip/keys [ws-send]} player-name]
-  (let [ref (str-uuid)]
+  (let [ref (util/str-uuid)]
     (ws-send (event/sign-out ref player-name))
     ref))
 
 (defn status
   "Request the status of a game, or all subscribers."
   [{:cljgossip/keys [ws-send]} game-name]
-  (let [ref (str-uuid)]
+  (let [ref (util/str-uuid)]
     (ws-send
      (if game-name
        (event/status-game ref game-name)
@@ -58,7 +54,7 @@
 (defn send-all
   "Send a message to all subscribers of a channel."
   [{:cljgossip/keys [ws-send]} channel-name source msg]
-  (let [ref (str-uuid)]
+  (let [ref (util/str-uuid)]
     (ws-send
      (event/send-all
       ref
@@ -69,8 +65,8 @@
 (defn send-to
   "Send a tell to a specific target. Returns ref uuid of the sent message."
   [{:cljgossip/keys [ws-send]} source target-game target msg]
-  (let [ref (str-uuid)
-        tstamp (.toString (Instant/now))]
+  (let [ref (util/str-uuid)
+        tstamp (util/tstamp-utc-now)]
     (ws-send (event/tell-send ref source target-game target msg tstamp))
     ref))
 

@@ -1,15 +1,17 @@
 (ns cljgossip.core-test
   (:require [clojure.test :refer :all]
             [cljgossip.core :refer :all]
-            [cljgossip.http-client.core :as client]
             [cljgossip.handlers :as handlers]))
 
 (comment
 
+  ;; TODO create a dummy ws connection with an atom to verify tests.
+  (defn test-ws-connect [uri event-handlers])
+
   (def app
     (atom
-     {:game
-      {:players #{}}}))
+     {:game {:players #{}}
+      :env {}}))
 
   (def env nil) ;; replace nil with config map
   
@@ -21,7 +23,7 @@
     {:cljgossip/on-heartbeat
      (partial handlers/default-on-heartbeat (list-players-fn app))})
 
-  (def conn (login env client/ws-connect (gossip-handlers app)))
+  (def conn (login (:env @app) client/ws-connect (gossip-handlers app)))
 
   (sign-in conn "Frida")
 
