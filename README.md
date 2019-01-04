@@ -1,5 +1,7 @@
 # cljgossip
 
+[![Clojars Project](https://img.shields.io/clojars/v/cljgossip.svg)](https://clojars.org/cljgossip)
+
 A MUD Gossip client library in clojure.
 
 This is an unaffiliated, unofficial implementation of <https://gossip.haus/docs> .
@@ -10,7 +12,9 @@ This is a library written in clojure that allows players on [MUD](https://en.wik
 
 # Status
 
-Alpha. Authorization, heartbeats, and chats are working. Other callbacks need more tests and samples.
+Beta. The library and default websocket client are feature-complete, but need more testing.
+A [sample project](https://github.com/kbsant/cljgossip-testapp) with a repl-based app
+is available.
 
 # Usage
 
@@ -30,8 +34,8 @@ Confirm that the account is working by loading the credentials in the repl, and 
      ;; login with the env, connection function and a handler map.
      ;; the library will automatically merge in a default heartbeat handler.
      ;; In this example, the handler map is empty. For a sample implementation,
-     ;; see core_test.clj.
-     (def conn (gossip/login env client/ws-connect {}))
+     ;; see cljgossip/wsclient and cljgossip/testapp.
+     (def conn (gossip/login env wsclient/ws-connect {}))
      ;; => get authentication and heartbeat messages
 
 ## Signing in
@@ -103,7 +107,9 @@ See:
 
 Plans for this library:
 
-* Separate the websocket library. The websocket library (jetty-based) is currently included in the main artifact. It should be moved into an optional artifact instead.
+* Add spec and improve tests. 
 
-* Sample app. The code in `core_test.clj` should be in its own sample app project.
+# See Also
 
+* The default websocket library, [cljgossip/wsclient](https://github.com/kbsant/cljgossip-client)
+* The sample app, [cljgossip/testapp](https://github.com/kbsant/cljgossip-testapp)
