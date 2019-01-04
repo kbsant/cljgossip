@@ -52,7 +52,7 @@ Or request the player list of a specific game:
 
 ## Sending messages
 
-Messages can be broadcasted to a channel
+Broadcast to a channel's subcribers
 
      ;; send to the test channel.
      (gossip/send-all conn "test" "Frida" "hi test")
@@ -61,7 +61,7 @@ Messages can be broadcasted to a channel
      ;; The list of channel names is available on the gossip.haus/docs site.
      (gossip/send-all conn nil "Frida" "hi all")
 
-Or sent to a specific user:
+Or send to a specific user. Note: as of testing time, Gossip requires that spaces be removed from the game name argument.
 
      (gossip/send-to conn "Frida" "SampleValhallaGame" "Thor" "hi there, Thor")
 

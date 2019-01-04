@@ -35,7 +35,7 @@
 
   (send-all conn "gossip" "Thor" "hello")
 
-  (send-to conn "Frida" "Game Name" "Thor" "hi, Thor")
+  (send-to conn "Frida" "GameName" "Thor" "hi, Thor")
 
   (status conn nil)
 
